@@ -1,11 +1,13 @@
 using System.Threading.Tasks;
+using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 
 public class RelayManager : MonoBehaviour {
 
     [SerializeField] private int maxPlayers = 4;
     private bool isSignedIn = false;
-    
+
     public async Task CreateRelay() {
         if (!isSignedIn) {
             await SignInAnonymously();
@@ -16,12 +18,14 @@ public class RelayManager : MonoBehaviour {
             IsPrivate = true, // Private sessions are not visible in queries and cannot be joined with quick-join. They can still be joined by ID or by Code.
         };
 
-        var allocation = await Unity.Services.Multiplayer.MultiplayerService.Instance.CreateSessionAsync(sessionOptions);
+        //var allocate = await Unity.Services.Multiplayer.MultiplayerService.Instance.CreateSessionAsync(sessionOptions);
+        var allocate = await Unity.Services.Relay.RelayService.Instance.CreateAllocationAsync(this.maxPlayers - 1);
+        var code = await Unity.Services.Relay.RelayService.Instance.GetJoinCodeAsync(allocate.AllocationId);
 
-        Debug.Log("Allocation ID: " + allocation.Id);
-        Debug.Log("Join Code: " + allocation.Code);
+        Debug.Log("Join Code: " + code);
+        GameManager.Instance.lobbyCode = code;
 
-        GameManager.Instance.lobbyCode = allocation.Code;
+        NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(Unity.Services.Relay.Models.AllocationUtils.ToRelayServerData(allocation: allocate, connectionType: "dtls"));
     }
 
     public async Task JoinRelay(string joinCode) {
@@ -30,11 +34,14 @@ public class RelayManager : MonoBehaviour {
         }
 
         try {
-            var joinAllocation = await Unity.Services.Multiplayer.MultiplayerService.Instance.JoinSessionByCodeAsync(joinCode);
-            Debug.Log("Joined Relay with Allocation ID: " + joinAllocation.Id);
+            //var joinAllocation = await Unity.Services.Multiplayer.MultiplayerService.Instance.JoinSessionByCodeAsync(joinCode);
+            var joinAllocation = await Unity.Services.Relay.RelayService.Instance.JoinAllocationAsync(joinCode);
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(Unity.Services.Relay.Models.AllocationUtils.ToRelayServerData(allocation: joinAllocation, connectionType: "dtls"));
         } catch (Unity.Services.Multiplayer.SessionException e) {
             Debug.LogError("Failed to join relay: " + e.Message);
         }
+
+
     }
 
     private async Task SignInAnonymously() {

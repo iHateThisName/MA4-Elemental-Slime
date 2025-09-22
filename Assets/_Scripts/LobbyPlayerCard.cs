@@ -1,27 +1,24 @@
 using TMPro;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LobbyPlayerCard : MonoBehaviour {
 
-    //[SerializeField] private TMP_Text playerNameText;
-    //[SerializeField] private Image playerStatusImage;
-    //// Start is called once before the first execution of Update after the MonoBehaviour is created
-    //void Start() {
-    //    // Player is not ready up
-    //    playerStatusImage.color = Color.red;
+    [SerializeField] private TMP_Text playerNameText;
+    [SerializeField] private Image playerStatusImage;
+    [SerializeField] private GameObject cardRoot;
 
-    //    if (NetworkManager.Singleton.IsServer) {
-    //        playerNameText.text = "Host";
-    //    } else {
-    //        playerNameText.text = "Client";
-    //    }
+    private void Awake() {
+        this.cardRoot.SetActive(false);
+    }
+    void Start() {
+        // Player is not ready up
+        playerStatusImage.color = Color.red;
+    }
 
-    //}
-
-    //// Update is called once per frame
-    //void Update() {
-
-    //}
+    public void SetPlayerName(string name) {
+        Debug.Log($"Setting player name to {name}");
+        this.cardRoot.SetActive(true);
+        playerNameText.text = name;
+    }
 }

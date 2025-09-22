@@ -21,6 +21,7 @@ public class MainMenuUI : MonoBehaviour {
 
         // Add listener to the join game button
         this.joinGameButton.onClick.AddListener(() => {
+            this.joinGameButton.interactable = false;
             this.PlayerJoinGame(this.lobbyCodeInputField.text);
         });
     }
@@ -28,7 +29,9 @@ public class MainMenuUI : MonoBehaviour {
         button.interactable = false;
         await this.relayManager.CreateRelay();
         await SceneManager.LoadSceneAsync(EnumScenes.Lobby.ToString());
-        NetworkManager.Singleton.StartHost();
+        if (!NetworkManager.Singleton.StartHost()) {
+            this.joinGameButton.interactable = true;
+        }
     }
 
     public async void PlayerJoinGame(string lobbyCode) {
