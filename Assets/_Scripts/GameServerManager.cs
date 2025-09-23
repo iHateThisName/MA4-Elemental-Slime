@@ -17,21 +17,21 @@ public class GameServerManager : NetworkBehaviour {
     }
     #endregion
 
+    public Action<(string name, int playerIndex)> OnPlayerConnected;
     private void Start() {
-        NetworkManager.Singleton.OnConnectionEvent += HandlePlayerConnected;
+        //NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnectedRpc;
     }
 
-    // Add a handler method with any name (not a Unity message) to handle the event
-    private void HandlePlayerConnected(NetworkManager manager, ConnectionEventData data) {
+    public override void OnNetworkSpawn() {
         if (IsServer) {
-            Debug.Log($"Player connected: {data.ClientId}");
+            NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnectedRpc;
         }
     }
 
-    //private void OnPlayerDisconnected(UnityEngine.NetworkPlayer player) {
+    [Rpc(SendTo.Server)]
+    private void HandleClientConnectedRpc(ulong obj) {
 
-    //}
-
-    //[Rpc(SendTo.ClientsAndHost)]
-    //public void 
+        (string playerName, int index) playerInfo = (playerName: String.Empty, index: NetworkManager.Singleton.ConnectedClientsList.Count);
+        this.OnPlayerConnected?.Invoke((playerInfo.playerName, playerInfo.index));
+    }
 }
