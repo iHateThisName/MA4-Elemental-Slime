@@ -1,7 +1,11 @@
+using System;
+using System.Runtime.CompilerServices;
+using System.Security;
 using TMPro;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Netcode;
 using UnityEngine;
-using Unity.Collections;
 
 public class LobbyPlayerCard : NetworkBehaviour {
 
@@ -14,48 +18,41 @@ public class LobbyPlayerCard : NetworkBehaviour {
     private NetworkVariable<FixedString32Bytes> username = new NetworkVariable<FixedString32Bytes>(value: "You",
                                                                                                    readPerm: NetworkVariableReadPermission.Everyone,
                                                                                                    writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField] private NetworkVariable<bool> isReady = new NetworkVariable<bool>(value: false,
+                                                                                         readPerm: NetworkVariableReadPermission.Everyone,
+                                                                                         writePerm: NetworkVariableWritePermission.Server);
 
+    public bool IsReady => this.isReady.Value;
+    private void Start() {
+        this.playerNameText.text = username.Value.ToString(); // In case the value was set before OnNetworkSpawn
+        this.playerStatusImage.color = this.isReady.Value ? Color.green : Color.red;
+    }
     public override void OnNetworkSpawn() {
         this.username.OnValueChanged += OnPlayerUsernameChanged;
+        this.isReady.OnValueChanged += OnPlayerReadyStatusChanged;
     }
-
     public override void OnNetworkDespawn() {
         this.username.OnValueChanged -= OnPlayerUsernameChanged;
+        this.isReady.OnValueChanged -= OnPlayerReadyStatusChanged;
     }
+
+    private void OnPlayerReadyStatusChanged(bool previousValue, bool newValue) {
+        this.playerStatusImage.color = newValue ? Color.green : Color.red;
+    }
+
     private void OnPlayerUsernameChanged(FixedString32Bytes previousValue, FixedString32Bytes newValue) {
         playerNameText.text = newValue.ToString();
     }
+
     [Rpc(SendTo.Server)]
     public void SetPlayerUsernameRpc(string newUsername) {
         FixedString32Bytes fixedString = new FixedString32Bytes(newUsername);
         this.username.Value = fixedString;
     }
 
-    //public override void OnNetworkSpawn() {
-    //    this.playerInfo.OnValueChanged += OnPlayerInfoStateChanged;
-
-    //    if (IsOwner) {
-    //        SetPlayerInfo("You", false);
-    //    }
-    //}
-    //public override void OnNetworkDespawn() {
-    //    this.playerInfo.OnValueChanged -= OnPlayerInfoStateChanged;
-    //}
-
-    //private void OnPlayerInfoStateChanged((string name, bool isReady) oldValue, (string name, bool isReady) newValue) {
-    //    playerNameText.text = newValue.name;
-    //    playerStatusImage.color = newValue.isReady ? Color.green : Color.red;
-    //}
-
-
-    //public void SetPlayerInfo(string username, bool IsReady = false) {
-    //    playerInfo.Value = (username, IsReady);
-    //}
-
-    //public void SetPlayerUsernameRpc(string newUsername) {
-    //    playerInfo.Value = (newUsername, playerInfo.Value.isReady);
-    //}
-    //public void SetPlayerReadyStatus(bool isReady) {
-    //    playerInfo.Value = (playerInfo.Value.name, isReady);
-    //}
+    [Rpc(SendTo.Server)]
+    public void SetPlayerReadyStatusRpc(bool readyStatus) {
+        Debug.Log($"SetPlayerReadyStatusRpc: Setting player {this.username.Value} ready status to {readyStatus}");
+        this.isReady.Value = readyStatus;
+    }
 }

@@ -28,7 +28,7 @@ public class MainMenuUI : MonoBehaviour {
     public async void OnHostGameButton(Button button) {
         button.interactable = false;
         await this.relayManager.CreateRelay();
-        await SceneManager.LoadSceneAsync(EnumScenes.Lobby.ToString());
+        await GameManager.Instance.LoadLobby();
         if (!NetworkManager.Singleton.StartHost()) {
             this.joinGameButton.interactable = true;
         }

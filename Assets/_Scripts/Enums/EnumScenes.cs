@@ -3,5 +3,6 @@ using UnityEngine;
 public enum EnumScenes
 {
     MainMenu,
-    Lobby
+    Lobby,
+    SampleScene,
 }
