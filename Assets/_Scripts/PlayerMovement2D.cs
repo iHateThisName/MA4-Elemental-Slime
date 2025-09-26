@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using static PlayerStateAnimator;
 
 public class PlayerMovement2D : NetworkBehaviour {
     [Header("Movement Settings")]
@@ -15,17 +16,37 @@ public class PlayerMovement2D : NetworkBehaviour {
 
     private float moveInput;
     private bool isGrounded;
+
+    [Header("Element Switch Settings")]
+
+    private NetworkVariable<ElementalType> currentElementalType = new NetworkVariable<ElementalType>(
+    ElementalType.Fire,
+    NetworkVariableReadPermission.Everyone,
+    NetworkVariableWritePermission.Owner);
+
+    [SerializeField] private float elementSwitchCooldown = 0.5f;
+    private float lastElementSwitchTime = 0f;
+
+
     public override void OnNetworkSpawn() {
-        // Disable physics on non-owners (they just follow the network interloop sync)
+        // Disable physics on non-owners just follow the network interloop sync
         //if (!IsOwner) {
         //    this.rb.bodyType = RigidbodyType2D.Kinematic;
         //    return;
         //}
 
         if (!IsOwner) return;
-        // Subscribe to the PlayerCollider
         this.playerCollider.OnGroundCollision += SetGrounded;
+        this.currentElementalType.OnValueChanged += OnElementalTypeChanged;
     }
+
+    public override void OnNetworkDespawn() {
+        if (!IsOwner) return;
+        this.playerCollider.OnGroundCollision -= SetGrounded;
+        this.currentElementalType.OnValueChanged -= OnElementalTypeChanged;
+    }
+
+    private void OnElementalTypeChanged(ElementalType previousValue, ElementalType newValue) => this.playerState.SetElementalTypeRpc(newValue);
 
     void Update() {
         if (!IsOwner) return; // Only the owner can control this player
@@ -49,6 +70,38 @@ public class PlayerMovement2D : NetworkBehaviour {
             this.playerState.SetState(PlayerStateAnimator.PlayerState.Jump);
         }
 
+        // Detect of q is pressed to change elemental type
+        if (Input.GetKeyDown(KeyCode.Q) && Time.time - lastElementSwitchTime >= elementSwitchCooldown) {
+            // Left Cycle to the next elemental type
+            switch (this.currentElementalType.Value) {
+                case ElementalType.Fire:
+                    this.currentElementalType.Value = ElementalType.Grass;
+                    break;
+                case ElementalType.Water:
+                    this.currentElementalType.Value = ElementalType.Fire;
+                    break;
+                case ElementalType.Grass:
+                    this.currentElementalType.Value = ElementalType.Water;
+                    break;
+            }
+            this.lastElementSwitchTime = Time.time;
+        }
+
+        if (Input.GetKeyDown(KeyCode.E) && Time.time - lastElementSwitchTime >= elementSwitchCooldown) {
+            // Right Cycle to the next elemental type
+            switch (this.currentElementalType.Value) {
+                case ElementalType.Fire:
+                    this.currentElementalType.Value = ElementalType.Water;
+                    break;
+                case ElementalType.Water:
+                    this.currentElementalType.Value = ElementalType.Grass;
+                    break;
+                case ElementalType.Grass:
+                    this.currentElementalType.Value = ElementalType.Fire;
+                    break;
+            }
+            this.lastElementSwitchTime = Time.time;
+        }
     }
 
     private void FixedUpdate() {

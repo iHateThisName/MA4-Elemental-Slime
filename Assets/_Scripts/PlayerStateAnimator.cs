@@ -14,7 +14,20 @@ public class PlayerStateAnimator : NetworkBehaviour {
     public static readonly int Jump = Animator.StringToHash("Jump");
     public static readonly int Idle = Animator.StringToHash("Idle");
 
+    [Header("Sprite Rendere Refrences")]
+    [SerializeField] private SpriteRenderer bodyRendere;
+    [SerializeField] private SpriteRenderer eyesRendere;
 
+    [Header("Sprites")]
+    [Header("Fire")]
+    [SerializeField] private Sprite fireBodySprite;
+    [SerializeField] private Sprite fireEyesSprite;
+    [Header("Water")]
+    [SerializeField] private Sprite waterBodySprite;
+    [SerializeField] private Sprite waterEyesSprite;
+    [Header("Grass")]
+    [SerializeField] private Sprite grassBodySprite;
+    [SerializeField] private Sprite grassEyesSprite;
 
 
     public override void OnNetworkSpawn() {
@@ -50,9 +63,37 @@ public class PlayerStateAnimator : NetworkBehaviour {
 
     public void OnJumpClipFinished() => SetState(PlayerState.Idle);
 
+    
+    ///<summary>
+    /// Sets the elemental type of the player and updates the body and eyes sprites accordingly.
+    /// This method is called via RPC and will execute on all clients and the host.
+    /// </summary>
+    /// <param name="type">The elemental type to set (Fire, Water, Grass).</param>
+    [Rpc(SendTo.ClientsAndHost)]
+    public void SetElementalTypeRpc(ElementalType type) {
+        switch (type) {
+            case ElementalType.Fire:
+                bodyRendere.sprite = fireBodySprite;
+                eyesRendere.sprite = fireEyesSprite;
+                break;
+            case ElementalType.Water:
+                bodyRendere.sprite = waterBodySprite;
+                eyesRendere.sprite = waterEyesSprite;
+                break;
+            case ElementalType.Grass:
+                bodyRendere.sprite = grassBodySprite;
+                eyesRendere.sprite = grassEyesSprite;
+                break;
+        }
+    }
+
 
 
     public enum PlayerState : int {
         Idle, Jump
+    }
+
+    public enum  ElementalType : int {
+        Fire, Water, Grass
     }
 }
