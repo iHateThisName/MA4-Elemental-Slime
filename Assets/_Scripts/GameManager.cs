@@ -1,13 +1,16 @@
 using System;
 using System.Threading.Tasks;
 using Unity.Netcode;
+using UnityEditor.PackageManager;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : NetworkBehaviour {
     public static GameManager Instance { get; private set; }
     public string lobbyCode;
 
-    //public Action<(string name, int playerIndex)> OnPlayerConnected;
+    [SerializeField] private Vector3[] spawnPoints;
+
     private void Awake() {
         // Singleton pattern implementation
         if (Instance != null && Instance != this) {
@@ -18,13 +21,26 @@ public class GameManager : NetworkBehaviour {
         }
     }
 
-    private void Start() {
-        //NetworkManager.Singleton.OnConnectionEvent += HandlePlayerConnected;
+    [Rpc(SendTo.ClientsAndHost)]
+    private void OnSceneLoadCompleteRpc(ulong clientId, string sceneName, LoadSceneMode mode) {
+        if (sceneName != EnumScenes.SampleScene.ToString()) return;
+
+        Debug.Log($"Client {clientId} finished loading {sceneName}");
+
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client)) {
+            var playerObject = client.PlayerObject;
+            if (playerObject != null) {
+                Vector3 startPos = spawnPoints[clientId];
+                playerObject.transform.position = startPos;
+                Debug.Log($"Placed player {clientId} at {startPos}");
+            }
+        }
     }
 
-    //[Rpc(SendTo.ClientsAndHost)] ?????
-    public void LoadStartGameRpc() {
+    public void LoadStartGame() {
         if (!IsServer) return;
+        Debug.Log("Loading Start Game Scene");
+        NetworkManager.Singleton.SceneManager.OnLoadComplete += OnSceneLoadCompleteRpc;
 
         // Load fade in animation scene here.
         //await UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("FadeInAnimationScene", UnityEngine.SceneManagement.LoadSceneMode.Additive);

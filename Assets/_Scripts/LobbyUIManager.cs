@@ -2,6 +2,7 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.CullingGroup;
 
 public class LobbyUIManager : NetworkBehaviour {
 
@@ -35,6 +36,11 @@ public class LobbyUIManager : NetworkBehaviour {
         this.readyUpButton.onClick.AddListener(OnReadyButton);
 
     }
+
+    public override void OnNetworkDespawn() {
+        this.readyUpButton.onClick.RemoveListener(OnReadyButton);
+        this.startGameButton.onClick.RemoveListener(OnStartGameButton);
+    }
     private async void OnReadyButton() {
         // Disable the button to prevent multiple clicks
         this.readyUpButton.interactable = false;
@@ -48,7 +54,7 @@ public class LobbyUIManager : NetworkBehaviour {
         // Update the button text based on the new status
         this.readyUpButton.GetComponentInChildren<TMP_Text>().text = myPlayerCard.IsReady ? "UnReady" : "Ready Up";
 
-        await System.Threading.Tasks.Task.Delay(2000); // Small delay to ensure the UI updates before re-enabling
+        await System.Threading.Tasks.Task.Delay(1000); // Small delay to ensure the UI updates before re-enabling
 
         this.readyUpButton.interactable = true;
 
@@ -57,7 +63,7 @@ public class LobbyUIManager : NetworkBehaviour {
 
     private void OnStartGameButton() {
         if (IsServer) {
-            GameManager.Instance.LoadStartGameRpc();
+            GameManager.Instance.LoadStartGame();
         }
     }
 

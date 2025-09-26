@@ -151,6 +151,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   lobbyCode: 
+  spawnPoints:
+  - {x: -30, y: -30, z: 0}
+  - {x: 30, y: -30, z: 0}
+  - {x: 0, y: -30, z: 0}
+  - {x: 0, y: -30, z: 0}
 --- !u!4 &15564536
 Transform:
   m_ObjectHideFlags: 0
@@ -901,7 +906,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 519471286}
-    PlayerPrefab: {fileID: 0}
+    PlayerPrefab: {fileID: 1013139706156030646, guid: 6a58dbf0b4ea33043b7a609ec6e9f962, type: 3}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: 0ea5cffc89579a240ac0d89a3518b33d, type: 2}
