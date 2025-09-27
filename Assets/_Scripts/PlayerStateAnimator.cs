@@ -13,6 +13,7 @@ public class PlayerStateAnimator : NetworkBehaviour {
 
     public static readonly int Jump = Animator.StringToHash("Jump");
     public static readonly int Idle = Animator.StringToHash("Idle");
+    public static readonly int KnockBack = Animator.StringToHash("KnockBack");
 
     [Header("Sprite Rendere Refrences")]
     [SerializeField] private SpriteRenderer bodyRendere;
@@ -42,9 +43,14 @@ public class PlayerStateAnimator : NetworkBehaviour {
 
 
     private void OnStateChanged(PlayerState previous, PlayerState next) {
+        if (next == previous) return; // No change
         switch (next) {
             case PlayerState.Jump:
-                animator.CrossFade(Jump, 0, 0);
+                this.animator.CrossFade(Jump, 0, 0);
+                break;
+
+            case PlayerState.KnockBack:
+                this.animator.CrossFade(KnockBack, 0, 0);
                 break;
 
             default:
@@ -63,7 +69,7 @@ public class PlayerStateAnimator : NetworkBehaviour {
 
     public void OnJumpClipFinished() => SetState(PlayerState.Idle);
 
-    
+
     ///<summary>
     /// Sets the elemental type of the player and updates the body and eyes sprites accordingly.
     /// This method is called via RPC and will execute on all clients and the host.
@@ -90,10 +96,10 @@ public class PlayerStateAnimator : NetworkBehaviour {
 
 
     public enum PlayerState : int {
-        Idle, Jump
+        Idle, Jump, KnockBack
     }
 
-    public enum  ElementalType : int {
-        Fire, Water, Grass
+    public enum ElementalType : int {
+        None, Fire, Water, Grass
     }
 }

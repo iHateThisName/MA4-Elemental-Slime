@@ -23,6 +23,7 @@ public class PlayerMovement2D : NetworkBehaviour {
     ElementalType.Fire,
     NetworkVariableReadPermission.Everyone,
     NetworkVariableWritePermission.Owner);
+    public ElementalType CurrentElementalType => currentElementalType.Value;
 
     [SerializeField] private float elementSwitchCooldown = 0.5f;
     private float lastElementSwitchTime = 0f;
@@ -38,7 +39,9 @@ public class PlayerMovement2D : NetworkBehaviour {
         if (!IsOwner) return;
         this.playerCollider.OnGroundCollision += SetGrounded;
         this.currentElementalType.OnValueChanged += OnElementalTypeChanged;
+        this.playerCollider.OnPlayerCollision += OnPlayerCollision;
     }
+
 
     public override void OnNetworkDespawn() {
         if (!IsOwner) return;
@@ -111,6 +114,39 @@ public class PlayerMovement2D : NetworkBehaviour {
     }
 
     private void SetGrounded(bool grounded) => this.isGrounded = grounded;
+
+    private void OnPlayerCollision(ulong collisionWithClientId) {
+
+        Debug.Log($"Player {OwnerClientId} collided with Player {collisionWithClientId}");
+        ulong clientID = OwnerClientId;
+
+        // get the elemental type of the other player
+        ElementalType collidedElementalType = GameServerManager.Instance.GetElementalTypeByClientId(collisionWithClientId);
+
+        if (GameManager.Instance.IsSuperEffectiveElement(attacker: this.currentElementalType.Value, defender: collidedElementalType)) {
+            Debug.Log($"Player {clientID} ({this.currentElementalType.Value}) hit Player {collisionWithClientId} ({collidedElementalType}) with super effective attack!");
+
+            var direction = (NetworkManager.Singleton.ConnectedClients[collisionWithClientId].PlayerObject.transform.position - this.playerTransform.position).normalized;
+            // Apply knockback to the other player
+            GameServerManager.Instance.ApplyKnockBackRpc(direction, collisionWithClientId);
+        } else {
+
+        }
+    }
+
+    [Rpc(SendTo.Owner)]
+    public void ApplyKnockbackRpc(Vector2 direction) {
+        this.playerState.SetState(PlayerState.KnockBack);
+        //direction.y += 0.2f; // Add some vertical lift to the knockback
+        //direction.x *= 1200f; // Scale the knockback force
+        ////this.rb.linearVelocity += direction * moveSpeed * 10;
+
+        //this.rb.AddForce(direction, ForceMode2D.Impulse);
+        //Debug.Log($"Applying knockback to player {OwnerClientId} in direction {direction}");
+
+        //// draw a debug line to show the direction of the knockback
+        //Debug.DrawLine(this.playerTransform.position, this.playerTransform.position + (Vector3)direction * 5f, Color.red, 10f);
+    }
 
     //[ServerRpc]
     //private void MoveServerRpc(float moveX, ServerRpcParams serverRpcParams = default) {

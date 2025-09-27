@@ -1,7 +1,5 @@
-using System;
 using System.Threading.Tasks;
 using Unity.Netcode;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -55,6 +53,20 @@ public class GameManager : NetworkBehaviour {
 
     public async Task LoadLobby() {
         await UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(EnumScenes.Lobby.ToString());
+    }
+
+
+
+    public bool IsSuperEffectiveElement(PlayerStateAnimator.ElementalType attacker, PlayerStateAnimator.ElementalType defender) {
+        if (attacker == PlayerStateAnimator.ElementalType.Fire && defender == PlayerStateAnimator.ElementalType.Grass) {
+            return true;
+        } else if (attacker == PlayerStateAnimator.ElementalType.Water && defender == PlayerStateAnimator.ElementalType.Fire) {
+            return true;
+        } else if (attacker == PlayerStateAnimator.ElementalType.Grass && defender == PlayerStateAnimator.ElementalType.Water) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     //private void HandlePlayerConnected(NetworkManager manager, ConnectionEventData data) {
