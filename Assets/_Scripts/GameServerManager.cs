@@ -55,7 +55,7 @@ public class GameServerManager : NetworkBehaviour {
         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(collisionWithClientId, out var client)) {
             var playerObject = client.PlayerObject;
             var playerMovement = playerObject.GetComponentInChildren<PlayerMovement2D>();
-            playerMovement.ApplyKnockbackRpc(direction);
+            playerMovement.ApplyKnockback(direction);
         }
     }
 }

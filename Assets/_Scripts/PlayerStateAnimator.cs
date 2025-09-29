@@ -5,6 +5,7 @@ public class PlayerStateAnimator : NetworkBehaviour {
 
     [SerializeField] private Animator animator;
 
+    [SerializeField]
     private NetworkVariable<PlayerState> currentState = new NetworkVariable<PlayerState>(
         PlayerState.Idle,
         NetworkVariableReadPermission.Everyone,
@@ -41,7 +42,6 @@ public class PlayerStateAnimator : NetworkBehaviour {
             currentState.OnValueChanged -= OnStateChanged;
     }
 
-
     private void OnStateChanged(PlayerState previous, PlayerState next) {
         if (next == previous) return; // No change
         switch (next) {
@@ -50,6 +50,7 @@ public class PlayerStateAnimator : NetworkBehaviour {
                 break;
 
             case PlayerState.KnockBack:
+                Debug.Log("KnockBack animation triggered");
                 this.animator.CrossFade(KnockBack, 0, 0);
                 break;
 

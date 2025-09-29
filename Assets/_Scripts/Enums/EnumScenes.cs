@@ -1,7 +1,4 @@
-using UnityEngine;
-
-public enum EnumScenes
-{
+public enum EnumScenes {
     MainMenu,
     Lobby,
     SampleScene,

@@ -50,7 +50,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDamping: 0
+  m_LinearDamping: 0.5
   m_AngularDamping: 0.05
   m_GravityScale: 3
   m_Material: {fileID: 6200000, guid: 70903044faab3dd4a9c7c31e4307b920, type: 2}
@@ -149,7 +149,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkRigidbodyBaseExpanded: 0
-  UseRigidBodyForMotion: 0
+  UseRigidBodyForMotion: 1
   AutoUpdateKinematicState: 1
   AutoSetKinematicOnDespawn: 1
 --- !u!1 &1520160333419340042
@@ -227,7 +227,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 101
   m_Sprite: {fileID: 21300000, guid: ee4917c432b898c4d9386245e50ecd3e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -284,12 +284,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  moveSpeed: 100
+  moveSpeed: 5
+  jumpForce: 100
   playerTransform: {fileID: 5261444300541972071}
   rb: {fileID: 2009042824592282107}
   playerModelTransform: {fileID: 4722236476191408814}
   playerCollider: {fileID: 7449104180580785040}
   playerState: {fileID: 6680143803580292379}
+  isGrounded: 0
+  isFaling: 0
   elementSwitchCooldown: 0.5
 --- !u!1 &6871090942044713209
 GameObject:
@@ -369,7 +372,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -1
+  m_SortingOrder: 100
   m_Sprite: {fileID: 21300000, guid: 6e3b6571287835242b2b948810ed92c8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -510,6 +513,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   animator: {fileID: 3055035328187084394}
+  currentState:
+    m_InternalValue: 0
   bodyRendere: {fileID: 1920626127243340188}
   eyesRendere: {fileID: 2111318211788393256}
   fireBodySprite: {fileID: 21300000, guid: 6e3b6571287835242b2b948810ed92c8, type: 3}

@@ -2,7 +2,6 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.CullingGroup;
 
 public class LobbyUIManager : NetworkBehaviour {
 
@@ -49,12 +48,19 @@ public class LobbyUIManager : NetworkBehaviour {
         LobbyPlayerCard myPlayerCard = this.GetLobbyPlayerCard((int)NetworkManager.Singleton.LocalClientId);
 
         // Toggle the ready status
-        myPlayerCard.SetPlayerReadyStatusRpc(!myPlayerCard.IsReady);
+        bool newReadyStatus = !myPlayerCard.IsReady;
+        myPlayerCard.SetPlayerReadyStatusRpc(newReadyStatus);
 
         // Update the button text based on the new status
-        this.readyUpButton.GetComponentInChildren<TMP_Text>().text = myPlayerCard.IsReady ? "UnReady" : "Ready Up";
+        TMP_Text readyUpButtonText = this.readyUpButton.GetComponentInChildren<TMP_Text>();
+        if (newReadyStatus) {
+            readyUpButtonText.text = "Un Ready";
+        } else {
+            readyUpButtonText.text = "Ready Up";
+        }
+        Debug.Log($"Player {NetworkManager.Singleton.LocalClientId} ready status: {myPlayerCard.IsReady}");
 
-        await System.Threading.Tasks.Task.Delay(1000); // Small delay to ensure the UI updates before re-enabling
+        await System.Threading.Tasks.Task.Delay(1000); // Small delay to ensure people not spaming the button.
 
         this.readyUpButton.interactable = true;
 
