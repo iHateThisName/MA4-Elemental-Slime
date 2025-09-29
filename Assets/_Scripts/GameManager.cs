@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -21,17 +22,19 @@ public class GameManager : NetworkBehaviour {
 
     [Rpc(SendTo.ClientsAndHost)]
     private void OnSceneLoadCompleteRpc(ulong clientId, string sceneName, LoadSceneMode mode) {
-        if (sceneName != EnumScenes.SampleScene.ToString()) return;
+        if (sceneName != EnumScenes.BasicArena1.ToString()) return;
 
         Debug.Log($"Client {clientId} finished loading {sceneName}");
 
         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client)) {
             var playerObject = client.PlayerObject;
-            if (playerObject != null) {
-                Vector3 startPos = spawnPoints[clientId];
-                playerObject.transform.position = startPos;
-                Debug.Log($"Placed player {clientId} at {startPos}");
-            }
+            Vector3 startPos = spawnPoints[clientId];
+            //playerObject.transform.position = startPos;
+            //playerObject.GetComponent<AnticipatedNetworkTransform>().AnticipateMove(startPos);
+            playerObject.GetComponent<NetworkTransform>().Teleport(startPos, Quaternion.identity, Vector3.one);
+            Debug.Log($"Placed player {clientId} at {startPos}");
+
+            playerObject.GetComponentInChildren<PlayerMovement2D>().EnableMovement();
         }
     }
 
@@ -46,6 +49,8 @@ public class GameManager : NetworkBehaviour {
         //UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(EnumScenes.SampleScene.ToString());
 
         NetworkManager.Singleton.SceneManager.LoadScene(EnumScenes.BasicArena1.ToString(), UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+
 
         // When fade in animation is done unloade the fade in animation scene here.
         //await UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync("FadeInAnimationScene");

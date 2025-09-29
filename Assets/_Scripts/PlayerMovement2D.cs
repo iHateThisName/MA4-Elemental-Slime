@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 using static PlayerStateAnimator;
@@ -18,10 +19,7 @@ public class PlayerMovement2D : NetworkBehaviour {
     [SerializeField] private bool isGrounded;
     [SerializeField] private bool isFaling = false;
 
-    private int lastHeightPosition = 0;
-
     [Header("Element Switch Settings")]
-
     private NetworkVariable<ElementalType> currentElementalType = new NetworkVariable<ElementalType>(
     ElementalType.Fire,
     NetworkVariableReadPermission.Everyone,
@@ -30,27 +28,19 @@ public class PlayerMovement2D : NetworkBehaviour {
 
     [SerializeField] private float elementSwitchCooldown = 0.5f;
     private float lastElementSwitchTime = 0f;
-    private Vector2 knockback = new Vector2(0, 0);
-
 
     public override void OnNetworkSpawn() {
-        // Disable physics on non-owners just follow the network interloop sync
-        //if (!IsOwner) {
-        //    this.rb.bodyType = RigidbodyType2D.Kinematic;
-        //    return;
-        //}
-
         if (!IsOwner) return;
         this.playerCollider.OnGroundCollision += SetGrounded;
         this.currentElementalType.OnValueChanged += OnElementalTypeChanged;
         this.playerCollider.OnPlayerCollision += OnPlayerCollision;
     }
 
-
     public override void OnNetworkDespawn() {
         if (!IsOwner) return;
         this.playerCollider.OnGroundCollision -= SetGrounded;
         this.currentElementalType.OnValueChanged -= OnElementalTypeChanged;
+        this.playerCollider.OnPlayerCollision -= OnPlayerCollision;
     }
 
     private void OnElementalTypeChanged(ElementalType previousValue, ElementalType newValue) => this.playerState.SetElementalTypeRpc(newValue);
@@ -73,14 +63,12 @@ public class PlayerMovement2D : NetworkBehaviour {
 
         // Jump
         if ((Input.GetButtonDown("Jump") || Input.GetButton("Jump")) && isGrounded) {
-            //this.animator.SetTrigger("JumpTrigger");
             this.playerState.SetState(PlayerStateAnimator.PlayerState.Jump);
             this.rb.linearVelocityY = this.jumpForce;
         }
 
         // Falling detection
         this.isFaling = !this.isGrounded && this.rb.linearVelocity.y < 0;
-        Debug.Log($"isFaling: {this.isFaling}, isGrounded: {this.isGrounded}, verticalVelocity: {this.rb.linearVelocity.y}");
 
         // Detect of q is pressed to change elemental type
         if (Input.GetKeyDown(KeyCode.Q) && Time.time - lastElementSwitchTime >= elementSwitchCooldown) {
@@ -118,7 +106,7 @@ public class PlayerMovement2D : NetworkBehaviour {
         if (Input.GetKeyDown(KeyCode.R)) {
             // Create a Vecotr2 direction from the player and behind the player
             var direction = -this.playerModelTransform.right + this.playerModelTransform.up * 0.9f;
-            ApplyKnockback(direction);
+            ApplyKnockbackRpc(direction);
         }
 
     }
@@ -148,23 +136,49 @@ public class PlayerMovement2D : NetworkBehaviour {
         if (GameManager.Instance.IsSuperEffectiveElement(attacker: collidedElementalType, defender: this.currentElementalType.Value)) {
             Debug.Log($"Player {clientID} ({this.currentElementalType.Value}) hit Player {collisionWithClientId} ({collidedElementalType}) with super effective attack!");
 
-            var direction = (NetworkManager.Singleton.ConnectedClients[collisionWithClientId].PlayerObject.transform.position - this.playerTransform.position).normalized;
-            // Apply knockback to the other player
-            //GameServerManager.Instance.ApplyKnockBackRpc(direction, collisionWithClientId);
+            bool isAttackerRight = NetworkManager.Singleton.ConnectedClients[collisionWithClientId].PlayerObject.transform.position.x > this.playerTransform.position.x;
+            Vector2 direction = this.playerModelTransform.up * 0.9f;
+            Debug.Log($"Is Attacker Right: {isAttackerRight}");
+
+            if (isAttackerRight) {
+                direction = -this.playerModelTransform.right + this.playerModelTransform.up * 0.9f;
+            } else {
+                direction = this.playerModelTransform.right + this.playerModelTransform.up * 0.9f;
+            }
             ApplyKnockback(direction);
+
+        } else if (GameManager.Instance.IsSuperEffectiveElement(attacker: this.currentElementalType.Value, defender: collidedElementalType)) {
+            Debug.Log($"Player {clientID} ({this.currentElementalType.Value}) hit Player {collisionWithClientId} ({collidedElementalType}) with super effective attack!");
+
+            bool isAttackerRight = NetworkManager.Singleton.ConnectedClients[collisionWithClientId].PlayerObject.transform.position.x < this.playerTransform.position.x;
+            Vector2 direction = this.playerModelTransform.up * 0.9f;
+
+            Debug.Log($"Is Attacker Right: {isAttackerRight}");
+
+            if (isAttackerRight) {
+                direction = -this.playerModelTransform.right + this.playerModelTransform.up * 0.9f;
+            } else {
+                direction = this.playerModelTransform.right + this.playerModelTransform.up * 0.9f;
+            }
+
+            NetworkManager.Singleton.ConnectedClients[collisionWithClientId].PlayerObject.GetComponentInChildren<PlayerMovement2D>().ApplyKnockbackRpc(direction);
         }
     }
 
+    [Rpc(SendTo.Owner)]
+    public void ApplyKnockbackRpc(Vector2 direction) {
+        Debug.Log($"Apply Knockback Rpc to player {OwnerClientId} in direction {direction}, {direction * 20f}");
+        this.rb.linearVelocity += direction * 100f;
+    }
     public void ApplyKnockback(Vector2 direction) {
         Debug.Log($"Applying knockback to player {OwnerClientId} in direction {direction}, {direction * 20f}");
-        //this.playerState.SetState(PlayerState.KnockBack);
-        //direction.y += 0.2f; // Add some vertical lift to the knockback
-        //direction.x *= 1200f; // Scale the knockback force
-        this.rb.linearVelocity += direction * 20f;
+        this.rb.linearVelocity += direction * 100f;
+    }
 
-
-        //this.rb.AddForce(direction, ForceMode2D.Impulse);
-        //Debug.Log($"Applying knockback to player {OwnerClientId} in direction {direction}");
+    //[Rpc(SendTo.Owner)]
+    public void EnableMovement() {
+        this.rb.linearVelocity = Vector2.zero;
+        this.rb.simulated = true;
     }
 
     //[ServerRpc]

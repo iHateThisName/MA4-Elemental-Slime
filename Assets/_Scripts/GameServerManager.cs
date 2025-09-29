@@ -48,16 +48,16 @@ public class GameServerManager : NetworkBehaviour {
         return PlayerStateAnimator.ElementalType.None;
     }
 
-    [Rpc(SendTo.Server)]
-    public void ApplyKnockBackRpc(Vector3 direction, ulong collisionWithClientId) {
-        Debug.Log($"Applying knockback to player {collisionWithClientId} in direction {direction}");
-        // Get the PlayerMovement2D component of the collided player
-        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(collisionWithClientId, out var client)) {
-            var playerObject = client.PlayerObject;
-            var playerMovement = playerObject.GetComponentInChildren<PlayerMovement2D>();
-            playerMovement.ApplyKnockback(direction);
-        }
-    }
+    //[Rpc(SendTo.Server)]
+    //public void ApplyKnockBackRpc(Vector3 direction, ulong collisionWithClientId) {
+    //    Debug.Log($"Applying knockback to player {collisionWithClientId} in direction {direction}");
+    //    // Get the PlayerMovement2D component of the collided player
+    //    if (NetworkManager.Singleton.ConnectedClients.TryGetValue(collisionWithClientId, out var client)) {
+    //        var playerObject = client.PlayerObject;
+    //        var playerMovement = playerObject.GetComponentInChildren<PlayerMovement2D>();
+    //        playerMovement.ApplyKnockbackRpc(direction);
+    //    }
+    //}
 }
 
 
