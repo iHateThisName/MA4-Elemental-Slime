@@ -45,7 +45,7 @@ public class GameManager : NetworkBehaviour {
 
         //UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(EnumScenes.SampleScene.ToString());
 
-        NetworkManager.Singleton.SceneManager.LoadScene(EnumScenes.SampleScene.ToString(), UnityEngine.SceneManagement.LoadSceneMode.Single);
+        NetworkManager.Singleton.SceneManager.LoadScene(EnumScenes.BasicArena1.ToString(), UnityEngine.SceneManagement.LoadSceneMode.Single);
 
         // When fade in animation is done unloade the fade in animation scene here.
         //await UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync("FadeInAnimationScene");
