@@ -31,11 +31,19 @@ public class GameManager : NetworkBehaviour {
             Vector3 startPos = spawnPoints[clientId];
             //playerObject.transform.position = startPos;
             //playerObject.GetComponent<AnticipatedNetworkTransform>().AnticipateMove(startPos);
-            playerObject.GetComponent<NetworkTransform>().Teleport(startPos, Quaternion.identity, Vector3.one);
+            //playerObject.GetComponent<NetworkTransform>().Teleport(startPos, Quaternion.identity, Vector3.one);
+            TeleportPlayerRpc(clientId, startPos);
             Debug.Log($"Placed player {clientId} at {startPos}");
 
             playerObject.GetComponentInChildren<PlayerMovement2D>().EnableMovement();
         }
+    }
+    [Rpc(SendTo.Server)]
+    public void TeleportPlayerRpc(ulong clientId, Vector3 newPosition) {
+        NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client);
+        NetworkObject playerObject = client.PlayerObject;
+        NetworkTransform networkTransform = playerObject.GetComponent<NetworkTransform>();
+        networkTransform.Teleport(newPosition, Quaternion.identity, Vector3.one);
     }
 
     public void LoadStartGame() {
