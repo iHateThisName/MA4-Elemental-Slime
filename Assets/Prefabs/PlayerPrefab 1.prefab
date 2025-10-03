@@ -471,11 +471,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   moveSpeed: 5
-  jumpForce: 100
+  jumpForce: 160
   knockbackForce: 100
-  fallGravity: 7
-  jumpGravity: 3.5
-  elementSwitchCooldown: 0.5
+  fallGravity: 9
+  jumpGravity: 5
+  elementSwitchCooldown: 3
   playerTransform: {fileID: 5261444300541972071}
   rb: {fileID: 2009042824592282107}
   playerModelTransform: {fileID: 4722236476191408814}
