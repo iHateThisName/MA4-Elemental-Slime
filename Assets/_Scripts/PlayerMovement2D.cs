@@ -26,11 +26,9 @@ public class PlayerMovement2D : NetworkBehaviour {
     [SerializeField] private float elementSwitchCooldown = 0.5f;
     public ElementalType CurrentElementalType => currentElementalType.Value;
     private float lastElementSwitchTime = 0f;
-    private NetworkVariable<ElementalType> currentElementalType =
-        new NetworkVariable<ElementalType>(value: ElementalType.Fire,
-            readPerm: NetworkVariableReadPermission.Everyone,
-            writePerm: NetworkVariableWritePermission.Owner
-        );
+    private NetworkVariable<ElementalType> currentElementalType = new NetworkVariable<ElementalType>(value: ElementalType.Fire,
+                                                                                                     readPerm: NetworkVariableReadPermission.Everyone,
+                                                                                                     writePerm: NetworkVariableWritePermission.Owner);
 
     [Header("Refrences")]
     [SerializeField] private Transform playerTransform;
@@ -38,10 +36,13 @@ public class PlayerMovement2D : NetworkBehaviour {
     [SerializeField] private Transform playerModelTransform;
     [SerializeField] private PlayerCollider playerCollider;
     [SerializeField] private PlayerStateAnimator stateAnimator;
+    [SerializeField] private PlayerCamerea playerCamera;
 
     private float moveInput;
     private bool isGrounded;
     private bool isFalling;
+    private bool isKilled = false;
+    private bool isDead = false;
 
 
     [Header("Debug")]
@@ -64,7 +65,14 @@ public class PlayerMovement2D : NetworkBehaviour {
     private void OnElementalTypeChanged(ElementalType previousValue, ElementalType newValue) => this.stateAnimator.SetElementalTypeRpc(newValue);
 
     void Update() {
-        if (!IsOwner) return; // Only the owner can control this player
+        if (!IsOwner && this.isDead) return; // Only the owner can control this player
+
+        if (this.isKilled && this.isGrounded) {
+            this.isDead = true;
+            this.rb.simulated = false;
+            //this.stateAnimator.SetState(PlayerStateAnimator.PlayerState.Dead);
+            this.playerCamera.DisableCamera();
+        }
 
         this.moveInput = Input.GetAxis("Horizontal");
 
@@ -91,7 +99,7 @@ public class PlayerMovement2D : NetworkBehaviour {
         // Detect of q is pressed to change elemental type
         if (Input.GetKeyDown(KeyCode.Q) && Time.time - this.lastElementSwitchTime >= this.elementSwitchCooldown) {
             // Left Cycle to the next elemental type
-            switch (this.currentElementalType.Value) {
+            switch (this.CurrentElementalType) {
                 case ElementalType.Fire:
                     this.currentElementalType.Value = ElementalType.Grass;
                     break;
@@ -107,7 +115,7 @@ public class PlayerMovement2D : NetworkBehaviour {
 
         if (Input.GetKeyDown(KeyCode.E) && Time.time - lastElementSwitchTime >= elementSwitchCooldown) {
             // Right Cycle to the next elemental type
-            switch (this.currentElementalType.Value) {
+            switch (this.CurrentElementalType) {
                 case ElementalType.Fire:
                     this.currentElementalType.Value = ElementalType.Water;
                     break;
@@ -147,18 +155,24 @@ public class PlayerMovement2D : NetworkBehaviour {
 
     private void OnPlayerCollision(ulong collisionWithClientId) {
 
-        if (this.enableLogging) Debug.Log($"Player {OwnerClientId} collided with Player {collisionWithClientId}");
+        if (this.enableLogging) {
+            Debug.Log($"Player {OwnerClientId} collided with Player {collisionWithClientId}");
+        }
         ulong clientID = OwnerClientId;
 
         // get the elemental type of the other player
         ElementalType collidedElementalType = GameServerManager.Instance.GetElementalTypeByClientId(collisionWithClientId);
 
         if (GameManager.Instance.IsSuperEffectiveElement(attacker: collidedElementalType, defender: this.currentElementalType.Value)) {
-            if (this.enableLogging) Debug.Log($"Player {clientID} ({this.currentElementalType.Value}) hit Player {collisionWithClientId} ({collidedElementalType}) with super effective attack!");
+            if (this.enableLogging) {
+                Debug.Log($"Player {clientID} ({this.currentElementalType.Value}) hit Player {collisionWithClientId} ({collidedElementalType}) with super effective attack!");
+            }
 
             bool isAttackerRight = NetworkManager.Singleton.ConnectedClients[collisionWithClientId].PlayerObject.transform.position.x > this.playerTransform.position.x;
             Vector2 direction = this.playerModelTransform.up * 0.9f;
-            if (this.enableLogging) Debug.Log($"Is Attacker Right: {isAttackerRight}");
+            if (this.enableLogging) {
+                Debug.Log($"Is Attacker Right: {isAttackerRight}");
+            }
 
             if (isAttackerRight) {
                 direction = -this.playerModelTransform.right + this.playerModelTransform.up * 0.9f;
@@ -168,12 +182,16 @@ public class PlayerMovement2D : NetworkBehaviour {
             ApplyKnockback(direction);
 
         } else if (GameManager.Instance.IsSuperEffectiveElement(attacker: this.currentElementalType.Value, defender: collidedElementalType)) {
-            if (this.enableLogging) Debug.Log($"Player {clientID} ({this.currentElementalType.Value}) hit Player {collisionWithClientId} ({collidedElementalType}) with super effective attack!");
+            if (this.enableLogging) {
+                Debug.Log($"Player {clientID} ({this.currentElementalType.Value}) hit Player {collisionWithClientId} ({collidedElementalType}) with super effective attack!");
+            }
 
             bool isAttackerRight = NetworkManager.Singleton.ConnectedClients[collisionWithClientId].PlayerObject.transform.position.x < this.playerTransform.position.x;
             Vector2 direction = this.playerModelTransform.up * 0.9f;
 
-            if (this.enableLogging) Debug.Log($"Is Attacker Right: {isAttackerRight}");
+            if (this.enableLogging) {
+                Debug.Log($"Is Attacker Right: {isAttackerRight}");
+            }
 
             if (isAttackerRight) {
                 direction = -this.playerModelTransform.right + this.playerModelTransform.up * 0.9f;
@@ -187,12 +205,18 @@ public class PlayerMovement2D : NetworkBehaviour {
 
     [Rpc(SendTo.Owner)]
     public void ApplyKnockbackRpc(Vector2 direction) {
-        if (this.enableLogging) Debug.Log($"Apply Knockback Rpc to player {OwnerClientId} in direction {direction}, {direction * 20f}");
+        if (this.enableLogging) {
+            Debug.Log($"Apply Knockback Rpc to player {OwnerClientId} in direction {direction}, {direction * 20f}");
+        }
         this.rb.linearVelocity += direction * this.knockbackForce;
+        this.isKilled = true;
     }
     public void ApplyKnockback(Vector2 direction) {
-        if (this.enableLogging) Debug.Log($"Applying knockback to player {OwnerClientId} in direction {direction}, {direction * 20f}");
+        if (this.enableLogging) {
+            Debug.Log($"Applying knockback to player {OwnerClientId} in direction {direction}, {direction * 20f}");
+        }
         this.rb.linearVelocity += direction * this.knockbackForce;
+        this.isKilled = true;
     }
 
     //[Rpc(SendTo.Owner)]

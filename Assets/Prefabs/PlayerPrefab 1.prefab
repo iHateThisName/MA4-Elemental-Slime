@@ -481,6 +481,7 @@ MonoBehaviour:
   playerModelTransform: {fileID: 4722236476191408814}
   playerCollider: {fileID: 7449104180580785040}
   stateAnimator: {fileID: 6680143803580292379}
+  playerCamera: {fileID: 8638977133237909336}
   enableLogging: 0
 --- !u!1 &6871090942044713209
 GameObject:

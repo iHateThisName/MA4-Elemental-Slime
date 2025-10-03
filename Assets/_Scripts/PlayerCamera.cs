@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -31,5 +32,9 @@ public class PlayerCamerea : NetworkBehaviour {
                 paralax.cam = playerCamera.gameObject;
             }
         }
+    }
+
+    public void DisableCamera() {
+        this.playerCamera.gameObject.SetActive(false);
     }
 }
