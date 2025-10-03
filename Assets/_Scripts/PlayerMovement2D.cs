@@ -70,7 +70,7 @@ public class PlayerMovement2D : NetworkBehaviour {
         if (this.isKilled && this.isGrounded) {
             this.isDead = true;
             this.rb.simulated = false;
-            //this.stateAnimator.SetState(PlayerStateAnimator.PlayerState.Dead);
+            this.stateAnimator.SetState(PlayerStateAnimator.PlayerState.Dead);
             this.playerCamera.DisableCamera();
         }
 

@@ -53,7 +53,10 @@ public class PlayerStateAnimator : NetworkBehaviour {
                 Debug.Log("KnockBack animation triggered");
                 this.animator.CrossFade(KnockBack, 0, 0);
                 break;
-
+            case PlayerState.Dead:
+                Debug.Log("Dead animation triggered");
+                bodyRendere.enabled = false;
+                break;
             default:
                 animator.CrossFade(Idle, 0, 0);
                 break;
@@ -97,7 +100,7 @@ public class PlayerStateAnimator : NetworkBehaviour {
 
 
     public enum PlayerState : int {
-        Idle, Jump, KnockBack
+        Idle, Jump, KnockBack, Dead
     }
 
     public enum ElementalType : int {
