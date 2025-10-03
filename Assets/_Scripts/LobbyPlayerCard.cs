@@ -1,9 +1,5 @@
-using System;
-using System.Runtime.CompilerServices;
-using System.Security;
 using TMPro;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -18,9 +14,10 @@ public class LobbyPlayerCard : NetworkBehaviour {
     private NetworkVariable<FixedString32Bytes> username = new NetworkVariable<FixedString32Bytes>(value: "You",
                                                                                                    readPerm: NetworkVariableReadPermission.Everyone,
                                                                                                    writePerm: NetworkVariableWritePermission.Server);
-    [SerializeField] private NetworkVariable<bool> isReady = new NetworkVariable<bool>(value: false,
-                                                                                         readPerm: NetworkVariableReadPermission.Everyone,
-                                                                                         writePerm: NetworkVariableWritePermission.Server);
+    [SerializeField]
+    private NetworkVariable<bool> isReady = new NetworkVariable<bool>(value: false,
+                                                                      readPerm: NetworkVariableReadPermission.Everyone,
+                                                                      writePerm: NetworkVariableWritePermission.Server);
 
     public bool IsReady => this.isReady.Value;
     private void Start() {
