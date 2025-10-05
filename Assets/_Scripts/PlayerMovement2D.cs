@@ -65,13 +65,14 @@ public class PlayerMovement2D : NetworkBehaviour {
     private void OnElementalTypeChanged(ElementalType previousValue, ElementalType newValue) => this.stateAnimator.SetElementalTypeRpc(newValue);
 
     void Update() {
-        if (!IsOwner && this.isDead) return; // Only the owner can control this player
+        if (!IsOwner || this.isDead) return; // Only the owner can control this player
 
         if (this.isKilled && this.isGrounded) {
             this.isDead = true;
             this.rb.simulated = false;
             this.stateAnimator.SetState(PlayerStateAnimator.PlayerState.Dead);
             this.playerCamera.DisableCamera();
+            this.playerCollider.DisableCollidersRpc();
         }
 
         this.moveInput = Input.GetAxis("Horizontal");
@@ -138,7 +139,7 @@ public class PlayerMovement2D : NetworkBehaviour {
     }
 
     private void FixedUpdate() {
-        if (!IsOwner) return; // Only the owner calculate physics for this player
+        if (!IsOwner || this.isDead) return; // Only the owner calculate physics for this player
 
         if (this.isFalling) {
             //this.rb.linearVelocity += new Vector2(this.moveInput * this.moveSpeed, -7f);

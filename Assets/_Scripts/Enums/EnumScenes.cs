@@ -3,4 +3,5 @@ public enum EnumScenes {
     Lobby,
     SampleScene,
     BasicArena1,
+    Arena5TheBigOne,
 }

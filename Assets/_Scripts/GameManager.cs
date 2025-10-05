@@ -10,6 +10,8 @@ public class GameManager : NetworkBehaviour {
 
     [SerializeField] private Vector3[] spawnPoints;
 
+    private int playersAlive, playerAmount;
+
     private void Awake() {
         // Singleton pattern implementation
         if (Instance != null && Instance != this) {
@@ -22,7 +24,7 @@ public class GameManager : NetworkBehaviour {
 
     [Rpc(SendTo.ClientsAndHost)]
     private void OnSceneLoadCompleteRpc(ulong clientId, string sceneName, LoadSceneMode mode) {
-        if (sceneName != EnumScenes.BasicArena1.ToString()) return;
+        if (sceneName != EnumScenes.Arena5TheBigOne.ToString()) return;
 
         Debug.Log($"Client {clientId} finished loading {sceneName}");
 
@@ -37,6 +39,9 @@ public class GameManager : NetworkBehaviour {
 
             playerObject.GetComponentInChildren<PlayerMovement2D>().EnableMovement();
         }
+
+        this.playerAmount++;
+        this.playersAlive++;
     }
     [Rpc(SendTo.Authority)]
     public void TeleportPlayerRpc(ulong clientId, Vector3 newPosition) {
@@ -56,7 +61,7 @@ public class GameManager : NetworkBehaviour {
 
         //UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(EnumScenes.SampleScene.ToString());
 
-        NetworkManager.Singleton.SceneManager.LoadScene(EnumScenes.BasicArena1.ToString(), UnityEngine.SceneManagement.LoadSceneMode.Single);
+        NetworkManager.Singleton.SceneManager.LoadScene(EnumScenes.Arena5TheBigOne.ToString(), UnityEngine.SceneManagement.LoadSceneMode.Single);
 
 
 

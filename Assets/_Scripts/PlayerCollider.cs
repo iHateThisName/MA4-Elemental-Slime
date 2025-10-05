@@ -2,9 +2,23 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerCollider : MonoBehaviour {
+public class PlayerCollider : NetworkBehaviour {
     public Action<bool> OnGroundCollision;
     public Action<ulong> OnPlayerCollision;
+
+    private Collider2D[] colliders;
+    private void Awake() {
+        this.colliders = this.GetComponents<Collider2D>();
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void DisableCollidersRpc() {
+        Debug.Log("Disabling player colliders");
+        foreach (Collider2D collider in this.colliders) {
+            collider.enabled = false;
+        }
+    }
+
     private void OnCollisionEnter2D(Collision2D collision) {
         if (collision.gameObject.CompareTag("Ground")) {
             this.OnGroundCollision?.Invoke(true);
