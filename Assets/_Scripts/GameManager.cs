@@ -73,6 +73,10 @@ public class GameManager : NetworkBehaviour {
         await UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(EnumScenes.Lobby.ToString());
     }
 
+    public void LoadScene(EnumScenes loadScene) {
+        NetworkManager.Singleton.SceneManager.LoadScene(loadScene.ToString(), LoadSceneMode.Single);
+    }
+
 
 
     public bool IsSuperEffectiveElement(PlayerStateAnimator.ElementalType attacker, PlayerStateAnimator.ElementalType defender) {
@@ -85,6 +89,18 @@ public class GameManager : NetworkBehaviour {
         } else {
             return false;
         }
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void PlayerKilledRcp() {
+        this.playersAlive--;
+        if (this.playersAlive == 1 && IsServer) {
+            LoadScene(EnumScenes.Lobby);
+        }
+    }
+
+    private void EndGame() {
+
     }
 
     //private void HandlePlayerConnected(NetworkManager manager, ConnectionEventData data) {
