@@ -98,12 +98,13 @@ public class GameManager : NetworkBehaviour {
         this.playersAlive--;
         if (this.playersAlive == 1 && IsServer) {
             ResetGameStateRpc();
-            LoadScene(EnumScenes.Lobby);
+            LoadScene(EnumScenes.Arena5TheBigOne);
         }
     }
 
     [Rpc(SendTo.Owner)]
     private void ResetGameStateRpc() {
+        Debug.Log("Resetting game state");
         OnResetGameState?.Invoke();
     }
 

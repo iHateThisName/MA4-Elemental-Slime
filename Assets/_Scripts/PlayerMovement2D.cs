@@ -161,12 +161,12 @@ public class PlayerMovement2D : NetworkBehaviour {
 
         if (this.isFalling) {
             //this.rb.linearVelocity += new Vector2(this.moveInput * this.moveSpeed, -7f);
-            this.rb.linearVelocity += new Vector2(this.moveInput * this.moveSpeed, this.fallGravity * -1);
+            this.rb.linearVelocity += new Vector2(this.moveInput * this.moveSpeed * 1.5f, this.fallGravity * -1);
         } else if (!this.isFalling && !this.isGrounded) {
             //this.rb.linearVelocity += new Vector2(this.moveInput * this.moveSpeed, -3.5f);
-            this.rb.linearVelocity += new Vector2(this.moveInput * this.moveSpeed, this.jumpGravity * -1);
+            this.rb.linearVelocity += new Vector2(this.moveInput * this.moveSpeed * 1.5f, this.jumpGravity * -1);
         } else {
-            this.rb.linearVelocity += new Vector2(this.moveInput * this.moveSpeed, 0);
+            this.rb.linearVelocity += new Vector2(this.moveInput * this.moveSpeed * 1.5f, 0);
         }
     }
 
@@ -229,6 +229,7 @@ public class PlayerMovement2D : NetworkBehaviour {
         }
         this.rb.linearVelocity += direction * this.knockbackForce;
         this.isKilled = true;
+        this.stateAnimator.SetState(PlayerStateAnimator.PlayerState.KnockBack);
     }
     public void ApplyKnockback(Vector2 direction) {
         if (this.enableLogging) {
@@ -236,6 +237,8 @@ public class PlayerMovement2D : NetworkBehaviour {
         }
         this.rb.linearVelocity += direction * this.knockbackForce;
         this.isKilled = true;
+        this.stateAnimator.SetState(PlayerStateAnimator.PlayerState.KnockBack);
+
     }
 
     //[Rpc(SendTo.Owner)]
