@@ -32,6 +32,7 @@ public class PlayerCollider : NetworkBehaviour {
             this.OnGroundCollision?.Invoke(true);
         } else if (collision.gameObject.CompareTag("Player")) {
             Debug.Log($"Collided with player {collision.gameObject.GetComponent<NetworkObject>().OwnerClientId}");
+            this.OnGroundCollision?.Invoke(true);
             this.OnPlayerCollision?.Invoke(collision.gameObject.GetComponent<NetworkObject>().OwnerClientId);
         }
     }
