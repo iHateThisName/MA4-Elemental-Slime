@@ -152,10 +152,14 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   lobbyCode: 
   spawnPoints:
-  - {x: -30, y: -30, z: 0}
-  - {x: 30, y: -30, z: 0}
+  - {x: -100, y: -30, z: 0}
+  - {x: -50, y: -30, z: 0}
   - {x: 0, y: -30, z: 0}
-  - {x: 0, y: -30, z: 0}
+  - {x: 50, y: -30, z: 0}
+  - {x: 100, y: -30, z: 0}
+  - {x: 50, y: 65, z: 0}
+  - {x: 80, y: 90, z: 0}
+  - {x: 70, y: 65, z: 0}
 --- !u!4 &15564536
 Transform:
   m_ObjectHideFlags: 0
