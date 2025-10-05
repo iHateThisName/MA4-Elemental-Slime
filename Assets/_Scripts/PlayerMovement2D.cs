@@ -74,7 +74,7 @@ public class PlayerMovement2D : NetworkBehaviour {
             this.playerCamera.DisableCamera();
             this.playerCollider.DisableCollidersRpc();
 
-            GameManager.Instance.PlayerKilledRcp();
+            GameManager.Instance.PlayerKilledRpc();
         }
 
         this.moveInput = Input.GetAxis("Horizontal");

@@ -92,7 +92,7 @@ public class GameManager : NetworkBehaviour {
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    public void PlayerKilledRcp() {
+    public void PlayerKilledRpc() {
         this.playersAlive--;
         if (this.playersAlive == 1 && IsServer) {
             LoadScene(EnumScenes.Lobby);
