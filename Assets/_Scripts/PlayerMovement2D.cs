@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 using static PlayerStateAnimator;
@@ -53,13 +54,28 @@ public class PlayerMovement2D : NetworkBehaviour {
         this.playerCollider.OnGroundCollision += SetGrounded;
         this.currentElementalType.OnValueChanged += OnElementalTypeChanged;
         this.playerCollider.OnPlayerCollision += OnPlayerCollision;
+        GameManager.Instance.OnResetGameState += OnReset;
     }
+
+
 
     public override void OnNetworkDespawn() {
         if (!IsOwner) return;
         this.playerCollider.OnGroundCollision -= SetGrounded;
         this.currentElementalType.OnValueChanged -= OnElementalTypeChanged;
         this.playerCollider.OnPlayerCollision -= OnPlayerCollision;
+        GameManager.Instance.OnResetGameState -= OnReset;
+    }
+
+    private void OnReset() {
+        if (!IsOwner) return;
+        this.isDead = false;
+        this.isKilled = false;
+        this.rb.simulated = true;
+        this.currentElementalType.Value = ElementalType.Fire;
+        this.stateAnimator.SetState(PlayerState.Idle);
+        this.playerCamera.EnableCamera();
+        this.playerCollider.EnableCollidersRpc();
     }
 
     private void OnElementalTypeChanged(ElementalType previousValue, ElementalType newValue) => this.stateAnimator.SetElementalTypeRpc(newValue);

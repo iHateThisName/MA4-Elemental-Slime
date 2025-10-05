@@ -37,4 +37,8 @@ public class PlayerCamerea : NetworkBehaviour {
     public void DisableCamera() {
         this.playerCamera.gameObject.SetActive(false);
     }
+
+    public void EnableCamera() {
+        this.playerCamera.gameObject.SetActive(true);
+    }
 }

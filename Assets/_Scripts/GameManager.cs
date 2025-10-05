@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Netcode.Components;
@@ -11,6 +12,7 @@ public class GameManager : NetworkBehaviour {
     [SerializeField] private Vector3[] spawnPoints;
 
     private int playersAlive, playerAmount;
+    public Action OnResetGameState;
 
     private void Awake() {
         // Singleton pattern implementation
@@ -95,12 +97,14 @@ public class GameManager : NetworkBehaviour {
     public void PlayerKilledRpc() {
         this.playersAlive--;
         if (this.playersAlive == 1 && IsServer) {
+            ResetGameStateRpc();
             LoadScene(EnumScenes.Lobby);
         }
     }
 
-    private void EndGame() {
-
+    [Rpc(SendTo.Owner)]
+    private void ResetGameStateRpc() {
+        OnResetGameState?.Invoke();
     }
 
     //private void HandlePlayerConnected(NetworkManager manager, ConnectionEventData data) {

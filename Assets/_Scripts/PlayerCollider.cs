@@ -19,6 +19,14 @@ public class PlayerCollider : NetworkBehaviour {
         }
     }
 
+    [Rpc(SendTo.ClientsAndHost)]
+    public void EnableCollidersRpc() {
+        Debug.Log("Enabling player colliders");
+        foreach (Collider2D collider in this.colliders) {
+            collider.enabled = true;
+        }
+    }
+
     private void OnCollisionEnter2D(Collision2D collision) {
         if (collision.gameObject.CompareTag("Ground")) {
             this.OnGroundCollision?.Invoke(true);
