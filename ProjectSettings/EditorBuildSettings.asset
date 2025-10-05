@@ -15,7 +15,7 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
-    path: Assets/Scenes/BasicArena1.unity
+    path: Assets/Scenes/Arena1.unity
     guid: 857ca25dfc9b60e48b9726b6c42849fa
   - enabled: 1
     path: Assets/Scenes/Arena5TheBigOne.unity
