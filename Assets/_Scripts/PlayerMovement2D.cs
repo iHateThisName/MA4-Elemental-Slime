@@ -67,10 +67,12 @@ public class PlayerMovement2D : NetworkBehaviour {
         GameManager.Instance.OnResetGameState -= OnReset;
     }
 
-    private void OnReset() {
+    public async void OnReset() {
         if (!IsOwner) return;
+        await System.Threading.Tasks.Task.Delay(1000);
         this.isDead = false;
         this.isKilled = false;
+        this.rb.linearVelocity = Vector2.zero;
         this.rb.simulated = true;
         this.currentElementalType.Value = ElementalType.Fire;
         this.stateAnimator.SetState(PlayerState.Idle);

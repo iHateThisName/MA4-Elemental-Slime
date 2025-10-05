@@ -44,6 +44,8 @@ public class PlayerStateAnimator : NetworkBehaviour {
 
     private void OnStateChanged(PlayerState previous, PlayerState next) {
         if (next == previous) return; // No change
+        if (previous == PlayerState.Dead) bodyRendere.enabled = true;
+        
         switch (next) {
             case PlayerState.Jump:
                 this.animator.CrossFade(Jump, 0, 0);

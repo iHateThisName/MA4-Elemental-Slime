@@ -39,11 +39,14 @@ public class GameManager : NetworkBehaviour {
             //TeleportPlayerRpc(clientId, startPos);
             Debug.Log($"Placed player {clientId} at {startPos}");
 
-            playerObject.GetComponentInChildren<PlayerMovement2D>().EnableMovement();
+            playerObject.GetComponentInChildren<PlayerMovement2D>().OnReset();
         }
 
         this.playerAmount++;
         this.playersAlive++;
+
+
+
     }
     [Rpc(SendTo.Authority)]
     public void TeleportPlayerRpc(ulong clientId, Vector3 newPosition) {
@@ -76,6 +79,8 @@ public class GameManager : NetworkBehaviour {
     }
 
     public void LoadScene(EnumScenes loadScene) {
+        this.playerAmount = 0;
+        this.playersAlive = 0;
         NetworkManager.Singleton.SceneManager.LoadScene(loadScene.ToString(), LoadSceneMode.Single);
     }
 
@@ -96,10 +101,13 @@ public class GameManager : NetworkBehaviour {
     [Rpc(SendTo.ClientsAndHost)]
     public void PlayerKilledRpc() {
         this.playersAlive--;
-        if (this.playersAlive == 1 && IsServer) {
-            ResetGameStateRpc();
-            LoadScene(EnumScenes.Arena5TheBigOne);
+        if (this.playersAlive == 1) {
+            if (IsServer) {
+                LoadScene(EnumScenes.Arena5TheBigOne);
+            }
         }
+
+        Debug.Log($"Player killed. {this.playersAlive} players remaining.");
     }
 
     [Rpc(SendTo.Owner)]
