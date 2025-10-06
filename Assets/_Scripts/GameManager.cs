@@ -26,7 +26,7 @@ public class GameManager : NetworkBehaviour {
 
     [Rpc(SendTo.ClientsAndHost)]
     private void OnSceneLoadCompleteRpc(ulong clientId, string sceneName, LoadSceneMode mode) {
-        if (sceneName != EnumScenes.Arena5TheBigOne.ToString()) return;
+        if (sceneName == EnumScenes.MainMenu.ToString() || sceneName == EnumScenes.Lobby.ToString()) return;
 
         Debug.Log($"Client {clientId} finished loading {sceneName}");
 
